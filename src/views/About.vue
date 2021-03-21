@@ -26,7 +26,7 @@
     </div>
   </div>
   <div class="footer">
-      <a href="">Github Repository</a>
+      <a href="https://github.com/MexicanCar/creative-project-three">Github Repository</a>
   </div>
   </div>
   
