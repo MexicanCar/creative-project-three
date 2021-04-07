@@ -1,7 +1,7 @@
 <template>
 <div id="content">
   <div class="list">
-    <router-link class="person" v-for="person in people" :key="person.id" :to="'/person/' + person.id">{{person.name}}<br></router-link>
+    <router-link class="person" v-for="person in people" :key="person.id" :to="'/person/' + person._id">{{person.name}}<br></router-link>
   </div>
   <div id="add">
     <h3>Add New Person</h3>
@@ -11,6 +11,9 @@
       <br>
       <label>Phone Number:</label>
       <input v-model="newPhone">
+      <br>
+      <label>Age:</label>
+      <input v-model="newAge">
       <br>
       <label>Interview Type:</label>
       <input v-model="interviewType">
@@ -31,10 +34,10 @@
       <button class="button" type="submit" @click.prevent="notHasInterviews">Not Setup</button>
     </form>
     <div class="new-list" v-if="showHasInterviews">
-      <router-link class="person" v-for="person in interviews" :key="person.id" :to="'/person/' + person.id">{{person.name}}<br></router-link>
+      <router-link class="person" v-for="person in interviews" :key="person.id" :to="'/person/' + person._id">{{person.name}}<br></router-link>
     </div>
     <div class="new-list" v-if="showNotInterviews">
-      <router-link class="person" v-for="person in nointerviews" :key="person.id" :to="'/person/' + person.id">{{person.name}}<br></router-link>
+      <router-link class="person" v-for="person in nointerviews" :key="person.id" :to="'/person/' + person._id">{{person.name}}<br></router-link>
     </div>
   </div>
 
@@ -47,15 +50,17 @@
 
 <script>
 // @ is an alias to /src
-
+import axios from 'axios';
 
 export default {
   name: 'Home',
 
   data() {
     return {
+    people: [],
     newName: "",
     newPhone: "",
+    newAge: null,
     newID: "",
     interview: false,
     interviewType: "",
@@ -66,11 +71,14 @@ export default {
     }
 
   },
+  created(){
+    this.getPeople();
+  },
 
   computed: {
-    people(){
-      return this.$root.$data.people;
-    },
+    // people(){
+    //   return this.$root.$data.people;
+    // },
     interviews(){
       let ints = this.people.filter(person => person.interview === true);
       return ints;
@@ -81,27 +89,48 @@ export default {
     }
   },
   methods: {
-    newPerson(){
-
+    async getPeople(){
+      let response = await axios.get("/api/people");
+      this.people = response.data;
+      return true;
+    },
+    async newPerson(){
       if(this.interviewType != ""){
-        this.interview =  true;
+        this.interview = true;
       }
-      this.people.push({
-        id: this.$root.$data.people[this.$root.$data.people.length-1].id+1,
+       let response = await axios.post("/api/people", {
         name: this.newName,
         phone: this.newPhone,
-        interview: this.interview,
-        interviewType: this.interviewType,
-        interviewDate: this.interviewDate,
-        interviewTime: this.interviewTime
+        age: this.newAge,
+        interview: this.interview
       });
+
+      let person = response.data;
+
+      await this.getPeople();
+
       this.newName = "";
       this.newPhone = "";
-      this.newID = "";
-      this.interview = false;
+      this.newAge = "";
+
+      this.$forceUpdate();
+
+      if(this.interview === true){
+        await axios.post('/api/people/'+person._id+'/interviews',{
+          person: person,
+          interviewType: this.interviewType,
+          interviewDate: this.interviewDate,
+          interviewTime: this.interviewTime
+        });
+
       this.interviewType = "";
       this.interviewDate = "";
       this.interviewTime = "";
+      this.interview = false;
+      
+      }
+      
+      
   },
   hasInterviews(){
     if(this.showHasInterviews){
@@ -160,7 +189,7 @@ export default {
     justify-content: center;
     align-items: center;
     margin-top: auto;
-    background-color: rgb(47, 255, 245);
+    background-color: rgb(252, 236, 16);
     height: 50px;
     width: 100%;
 }

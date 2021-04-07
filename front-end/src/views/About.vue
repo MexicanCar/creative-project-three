@@ -61,7 +61,7 @@
     justify-content: center;
     align-items: center;
     margin-top: auto;
-    background-color: rgb(47, 255, 245);
+    background-color: rgb(252, 236, 16);
     height: 50px;
     width: 100%;
 }

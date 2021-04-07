@@ -35,7 +35,7 @@ body{
 #nav {
   font-size: 30px;
   padding: 30px;
-  background-color: rgb(47, 255, 245);
+  background-color: rgb(252, 236, 16);
 }
 
 #nav a {

@@ -1,16 +1,19 @@
 <template>
 <div class="container">
-    <div class="wrapper">
+    <div v-if="!person">
+        <h3>This User has been deleted!</h3>
+        <h1>Press HOME to return to the previous page.</h1>
+    </div>
+    <div class="wrapper" v-else>
       <div class="true-interview" v-if="person.interview">
         <div class="person">
             <div id="person-info">
               <h3 class="name" v-text="person.name"></h3>
               <h4 v-text="'Phone #: ' +person.phone"></h4>
               <h4 v-text="'Age: ' + person.age"></h4>
-              <h4 v-text="person.interviewType"></h4>
-              <h4 v-text="'Date/Time: ' + person.interviewDate + ' ' + person.interviewTime"></h4>
+              <h4 v-text="interviews.interviewType"></h4>
+              <h4 v-text="'Date/Time: ' + interviews.interviewDate + ' ' + interviews.interviewTime"></h4>
             </div>
-
             <div id="edit-person" v-if="this.visible">
               <form @submit.prevent="editPerson">
               <label>Name: </label>
@@ -30,12 +33,15 @@
               <form id="buttons">
               <button class="button" type="submit" @click="deletePerson">Delete Person</button>
               <button class="button" type="submit" @click.prevent="setVisible">Edit Person</button>
-              <button class="button" type="submit" @click.prevent="person.interview = false; person.interviewType=''; person.interviewDate=''; person.interviewTime='';">Interview Complete</button>
+              <button class="button" type="submit" @click.prevent="completeInterview">Interview Complete</button>
               </form>
             </div>
             
         </div>
       </div>
+
+      
+
       <div id="setup-interview" v-else>
 
         <div class="information">
@@ -53,15 +59,13 @@
               <label>Age: </label>
               <input v-model="age">
               <br>
-              <button type="submit" @click.prevent="editPerson">Submit</button>
+              <button type="submit">Submit</button>
               </form>
         </div>
 
             <div>
-              <form>
-              <button class="button" type="submit" @click="deletePerson">Delete Person</button>
-              <button class="button" type="submit" @click.prevent="setVisible">Edit Person</button>
-              </form>
+              <button class="button" @click="deletePerson">Delete Person</button>
+              <button class="button" @click="setVisible">Edit Person</button>
             </div>
         </div>
         <div id="setup">
@@ -171,7 +175,7 @@ label{
     justify-content: center;
     align-items: center;
     margin-top: auto;
-    background-color: rgb(47, 255, 245);
+    background-color: rgb(252, 236, 16);
     height: 50px;
     width: 100%;
 }
@@ -223,10 +227,15 @@ label{
 </style>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Person',
   data(){
     return{
+      person: {},
+      interviews: {},
+      people: [],
       interview: true,
       interviewType: "",
       interviewDate: "",
@@ -235,28 +244,58 @@ export default {
       name: "",
       phone: "",
       age: "",
+      exists: false
     }
   },
-  created() {
-    this.person = this.$root.$data.people.find(person => person.id === parseInt(this.$route.params.id));
+  async created() {
+    if(await this.getPerson()){
+      this.exists = true;
+      if( this.person.interview === true){
+        await this.getInterview();
+      }
+    }
   },
   methods:{
-    setupInterview(){
-      this.person.interview = this.interview;
-      this.person.interviewType = this.interviewType;
-      this.person.interviewDate = this.interviewDate;
-      this.person.interviewTime = this.interviewTime;
-
+    async getPerson(){
+      let response = await axios.get("/api/people/" + this.$route.params.id);
+      this.person = response.data;
+      return true;
+    },
+    async getInterview(){
+      let response = await axios.get("/api/people/" + this.$route.params.id + "/interviews");
+      this.interviews = response.data;
+      console.log(this.interviews._id);
+      return true;
+    },
+    async setupInterview(){
+      let response = await axios.post('/api/people/'+this.person._id+'/interviews',{
+          person: this.person,
+          interviewType: this.interviewType,
+          interviewDate: this.interviewDate,
+          interviewTime: this.interviewTime
+      });
+        this.interviews = response.data;
+        this.person.interview = true;
+        await axios.put('/api/people/complete/' + this.$route.params.id);
+    
       this.interviewType = "";
       this.interviewDate = "";
       this.interviewTime = "";
+     await this.getInterview();
+     await this.getPerson();
     },
-    deletePerson(){
-      const index = this.$root.$data.people.indexOf(this.person);
 
-      this.$root.$data.people.splice(index, 1);
-      this.$router.push("/");
+    async deletePerson(){
+      console.log("Deleting");
+        this.person = null;
+        await axios.delete("/api/people/" + this.$route.params.id);
+        
+
+        // await axios.delete("/api/interviews/" + this.interviews._id);
+        this.interviews = null;
+        this.exists = false;
     },
+
     setVisible(){
       if(this.visible === false){
         this.visible = true;
@@ -264,7 +303,7 @@ export default {
         this.visible = false;
       }
     },
-    editPerson(){
+    async editPerson(){
       if(this.name != ""){
         this.person.name = this.name;
       }
@@ -277,10 +316,32 @@ export default {
         this.person.age = this.age;
       }
 
+      await axios.put('/api/people/' + this.$route.params.id, {
+        
+        name: this.person.name,
+        age: this.person.age,
+        phone: this.person.phone,
+        interview: this.person.interview
+      });
+
       this.visible = false;
       this.phone = "";
       this.name = "";
       this.age = "";
+
+      
+    },
+    async completeInterview(){
+      let response = await axios.delete("/api/interviews/" + this.interviews._id + "/" + this.$route.params.id);
+        this.interviews = null;
+      this.person = response.data;
+      this.interviewType = "";
+      this.interviewDate = "";
+      this.interviewTime = "";
+      
+      this.getPerson();
+
+
     }
   }
 }
