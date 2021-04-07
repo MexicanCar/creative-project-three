@@ -264,7 +264,6 @@ export default {
     async getInterview(){
       let response = await axios.get("/api/people/" + this.$route.params.id + "/interviews");
       this.interviews = response.data;
-      console.log(this.interviews._id);
       return true;
     },
     async setupInterview(){
@@ -286,7 +285,6 @@ export default {
     },
 
     async deletePerson(){
-      console.log("Deleting");
         this.person = null;
         await axios.delete("/api/people/" + this.$route.params.id);
         
