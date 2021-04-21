@@ -175,7 +175,7 @@ label{
     justify-content: center;
     align-items: center;
     margin-top: auto;
-    background-color: rgb(252, 236, 16);
+    background-color: lightpink;
     height: 50px;
     width: 100%;
 }

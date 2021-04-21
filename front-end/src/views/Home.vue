@@ -1,48 +1,13 @@
 <template>
 <div id="content">
-  <div class="list">
-    <router-link class="person" v-for="person in people" :key="person.id" :to="'/person/' + person._id">{{person.name}}<br></router-link>
-  </div>
-  <div id="add">
-    <h3>Add New Person</h3>
-    <form @submit.prevent="newPerson">
-      <label>Name:</label>
-      <input v-model="newName">
-      <br>
-      <label>Phone Number:</label>
-      <input v-model="newPhone">
-      <br>
-      <label>Age:</label>
-      <input v-model="newAge">
-      <br>
-      <label>Interview Type:</label>
-      <input v-model="interviewType">
-      <br>
-      <label>Interview Date:</label>
-      <input v-model="interviewDate">
-      <br>
-      <label>Interview Time:</label>
-      <input v-model="interviewTime">
-      <br>
-      <button type="submit">Submit</button>
-    </form>
-  </div>
-  <div id="extra-info">
-    <form id="buttons">
-      <button class="button" type="submit" @click.prevent="hasInterviews">Setup</button>
-      <br>
-      <button class="button" type="submit" @click.prevent="notHasInterviews">Not Setup</button>
-    </form>
-    <div class="new-list" v-if="showHasInterviews">
-      <router-link class="person" v-for="person in interviews" :key="person.id" :to="'/person/' + person._id">{{person.name}}<br></router-link>
-    </div>
-    <div class="new-list" v-if="showNotInterviews">
-      <router-link class="person" v-for="person in nointerviews" :key="person.id" :to="'/person/' + person._id">{{person.name}}<br></router-link>
-    </div>
-  </div>
+  <div id="request">
+    <NewRequest v-if="user" />
+    <Login v-else />
 
+  </div>
   <div class="footer">
       <a href="https://github.com/MexicanCar/creative-project-three">Github Repository</a>
+      <p>Hours: 4</p>
   </div>
 </div>
 
@@ -52,9 +17,15 @@
 // @ is an alias to /src
 import axios from 'axios';
 
+import Login from '@/components/Login.vue';
+import NewRequest from '@/components/NewRequest.vue';
+
 export default {
   name: 'Home',
-
+components: {
+    Login,
+    NewRequest
+  },
   data() {
     return {
     people: [],
@@ -69,85 +40,19 @@ export default {
     showHasInterviews: false,
     showNotInterviews: false,
     }
-
   },
-  created(){
-    this.getPeople();
+  async created() {
+    try {
+      let response = await axios.get('/api/users');
+      this.$root.$data.user = response.data.user;
+    } catch (error) {
+      this.$root.$data.user = null;
+    }
   },
-
   computed: {
-    // people(){
-    //   return this.$root.$data.people;
-    // },
-    interviews(){
-      let ints = this.people.filter(person => person.interview === true);
-      return ints;
-    },
-    nointerviews(){
-      let noInts = this.people.filter(person => person.interview != true);
-      return noInts;
+    user() {
+      return this.$root.$data.user;
     }
-  },
-  methods: {
-    async getPeople(){
-      let response = await axios.get("/api/people");
-      this.people = response.data;
-      return true;
-    },
-    async newPerson(){
-      if(this.interviewType != ""){
-        this.interview = true;
-      }
-       let response = await axios.post("/api/people", {
-        name: this.newName,
-        phone: this.newPhone,
-        age: this.newAge,
-        interview: this.interview
-      });
-
-      let person = response.data;
-
-      await this.getPeople();
-
-      this.newName = "";
-      this.newPhone = "";
-      this.newAge = "";
-
-      this.$forceUpdate();
-
-      if(this.interview === true){
-        await axios.post('/api/people/'+person._id+'/interviews',{
-          person: person,
-          interviewType: this.interviewType,
-          interviewDate: this.interviewDate,
-          interviewTime: this.interviewTime
-        });
-
-      this.interviewType = "";
-      this.interviewDate = "";
-      this.interviewTime = "";
-      this.interview = false;
-      
-      }
-      
-      
-  },
-  hasInterviews(){
-    if(this.showHasInterviews){
-      this.showHasInterviews = false;
-    }else{
-      this.showHasInterviews = true;
-      this.showNotInterviews = false;
-    }
-  },
-  notHasInterviews(){
-    if(this.showNotInterviews){
-      this.showNotInterviews = false;
-    }else{
-      this.showNotInterviews = true;
-      this.showHasInterviews = false;
-    }
-  },
   }
 }
 </script>
@@ -187,9 +92,10 @@ export default {
 .footer{
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     margin-top: auto;
-    background-color: rgb(252, 236, 16);
+    background-color: lightpink;
     height: 50px;
     width: 100%;
 }

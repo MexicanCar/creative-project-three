@@ -6,27 +6,27 @@
     <div class="wrapper">
       <div class="column-one">
         <h2>Home Page</h2>
-        <h4>The Home Page is split into 3 sections-</h4>
-        <h4>1) A list of all the people in the database.</h4>
-        <h4>2) A form to add people to the database.</h4>
-        <h4>3) Two buttons to display people with</h4>
-        <h4> interviews setup/not setup.</h4>
+        <h4></h4>
+        <h4>1) Create an account/Login.</h4>
+        <h4>2) Fill out the interview request form.</h4>
+        <h4>3) Submit the request form.</h4>
       </div>
       <div class="column-two">
-        <h2>Individual Pages</h2>
-        <h4>The Individual Pages have many different tools.</h4>
-        <h4>1) They contain the persons-</h4>
-        <h4>Name, Age, and Phone Number.</h4>
-        <h4>2) They allow you to edit/delete the person.</h4>
-        <h4>3) They display interview information.</h4>
-        <h4>4) They allow you to setup interviews</h4>
+        <h2>Admin Dashboard</h2>
+        <h4>This is only available to admin users.</h4>
+        <h4>1) Lists all of the people (not users) in the database.</h4>
+        <h4>2) Allows you to edit/delete the person.</h4>
+        <h4>3) Displays interview information.</h4>
+        <h4>4) Allows you to setup interviews</h4>
         <h4>for the individual.</h4>
-        <h4>5) They allow you to 'complete' the interview.</h4>
+        <h4>5) Allows you to 'complete' the interview.</h4>
+        <h4>6) Allows you to check interview requests.</h4>
       </div>
     </div>
   </div>
   <div class="footer">
       <a href="https://github.com/MexicanCar/creative-project-three">Github Repository</a>
+      <p>Hours: 4</p>
   </div>
   </div>
   
@@ -59,9 +59,10 @@
 .footer{
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     margin-top: auto;
-    background-color: rgb(252, 236, 16);
+    background-color: lightpink;
     height: 50px;
     width: 100%;
 }

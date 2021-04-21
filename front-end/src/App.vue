@@ -2,13 +2,35 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/about">About</router-link> 
+      <router-link v-if="user && user.role==='admin'" to="/dashboard"> | Dashboard</router-link>
     </div>
     <router-view/>
 
     
   </div>
 </template>
+
+<script>
+import axios from 'axios';
+export default {
+  name: "app",
+  async created() {
+    try {
+      let response = await axios.get('/api/users');
+      this.$root.$data.user = response.data.user;
+    } catch (error) {
+      this.$root.$data.user = null;
+    }
+  },
+  computed: {
+    user() {
+      return this.$root.$data.user;
+    }
+  },
+  
+}
+</script>
 
 <style>
 *{
@@ -35,7 +57,7 @@ body{
 #nav {
   font-size: 30px;
   padding: 30px;
-  background-color: rgb(252, 236, 16);
+  background-color: lightpink;
 }
 
 #nav a {
