@@ -7,6 +7,10 @@ const User = users.model;
 const validUser = users.valid;
 
 const requestSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+      },
     firstName: String,
     lastName: String,
     phone: String,
@@ -20,6 +24,7 @@ const requestSchema = new mongoose.Schema({
 
   router.post("/", validUser, async(req, res) => {
       const interview = new Request({
+          user: req.user,
           firstName: req.body.firstName,
           lastName: req.body.lastName,
           phone: req.body.phone,
@@ -44,6 +49,18 @@ const requestSchema = new mongoose.Schema({
           console.log(error);
           return res.sendStatus(500);
       }
+  });
+
+  router.get("/user", validUser, async(req, res) => {
+    try{
+        let requests = await Request.find({
+            user: req.user
+        }).populate('user');
+        return res.send(requests);
+    }catch (error){
+        console.log(error);
+        return res.sendStatus(500);
+    }
   });
 
   router.delete("/:id", validUser, async(req, res) => {
